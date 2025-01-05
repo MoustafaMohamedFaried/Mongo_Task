@@ -18,12 +18,16 @@ class UserController extends Controller
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
-        $this->middleware('auth:api', ['only' => ['profile']]);
     }
 
     public function index()
     {
-        return $this->apiResponse($this->userService->getAllUsers(), '', 200);
+        try {
+            // dd("sad")
+            return $this->apiResponse($this->userService->getAllUsers(), '', 200);
+        } catch (\Exception $e) {
+            return $this->errorApiResponse($e->getMessage(), 'Error at create user', $e->getCode());
+        }
     }
 
     public function store(Request $request)
@@ -144,6 +148,10 @@ class UserController extends Controller
         auth()->logout();
 
         return $this->apiResponse([], 'User successfully signed out', 200);
+    }
+
+    public function checkLogin(){
+        return $this->apiResponse([], 'Forbidden', 403);
     }
 
 }
