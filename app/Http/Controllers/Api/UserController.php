@@ -132,4 +132,11 @@ class UserController extends Controller
     {
         return $this->apiResponse(auth()->user(), '', 200);
     }
+
+    public function logout() {
+        auth()->logout();
+
+        return $this->apiResponse([], 'User successfully signed out', 200);
+    }
+
 }
