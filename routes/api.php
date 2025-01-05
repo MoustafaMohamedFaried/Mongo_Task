@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('users', UserController::class);
-Route::post('/users/register', [UserController::class, 'register'])->name('users.register');
-Route::post('/users/login', [UserController::class, 'login'])->name('users.login');
-Route::get('/users/profile', [UserController::class, 'profile'])->name('users.profile');
+Route::post('/register', [UserController::class, 'register'])->name('users.register');
+Route::post('/login', [UserController::class, 'login'])->name('users.login');
+Route::get('/user_profile', [UserController::class, 'profile'])->name('users.profile');
 
