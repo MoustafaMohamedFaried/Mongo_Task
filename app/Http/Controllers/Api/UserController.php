@@ -96,9 +96,15 @@ class UserController extends Controller
             ]);
 
             // Use the AuthService to handle registration
-            $user = $this->userService->createUser($validatedData);
+            $this->userService->createUser($validatedData);
 
-            return $this->apiResponse($user, 'User registered successfully', 201); // 201 for resource created
+            if (!$token = auth()->attempt($validatedData)) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $createdToken = $this->userService->createNewToken($token);
+
+            return $this->apiResponse($createdToken, 'User registered successfully', 201); // 201 for resource created
         } catch (ValidationException $e) {
             return $this->errorApiResponse($e->errors(), 'Validation failed', 422); // 422 Unprocessable Entity
         } catch (\Exception $e) {
@@ -115,7 +121,7 @@ class UserController extends Controller
                 'password' => 'required|string',
             ]);
 
-            if (! $token = auth()->attempt($validatedData)) {
+            if (!$token = auth()->attempt($validatedData)) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
@@ -133,7 +139,8 @@ class UserController extends Controller
         return $this->apiResponse(auth()->user(), '', 200);
     }
 
-    public function logout() {
+    public function logout()
+    {
         auth()->logout();
 
         return $this->apiResponse([], 'User successfully signed out', 200);
