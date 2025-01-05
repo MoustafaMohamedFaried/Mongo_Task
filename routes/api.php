@@ -25,10 +25,10 @@ use Illuminate\Support\Facades\Route;
 // Routes that don't require authentication
 // Route::post('/register', [UserController::class, 'register'])->name('users.register');
 Route::get('/login-data', [UserController::class, 'checkLogin'])->name('users.checkLogin');
-Route::post('/login', [UserController::class, 'login'])->name('users.login')->middleware('checkMostafa');
+Route::post('/login', [UserController::class, 'login'])->name('users.login')->middleware('checkApiKey');
 
 // Routes that require authentication
-Route::group(['middleware' => ['auth:jwt', 'checkMostafa']], function () {
+Route::group(['middleware' => ['auth:jwt', 'checkApiKey']], function () {
     Route::apiResource('users', UserController::class);
     Route::get('/user_profile', [UserController::class, 'profile'])->name('users.profile');
     Route::get('/logout', [UserController::class, 'logout'])->name('users.logout');

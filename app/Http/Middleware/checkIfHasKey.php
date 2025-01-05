@@ -15,7 +15,7 @@ class checkIfHasKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!$request->header('x-api-key') || $request->header('x-api-key') != 'kdsldnsjdnsjkndjksndjknskd545646545645646'){
+        if(!$request->header('x-api-key') || $request->header('x-api-key') != env('API_KEY')){
             return response()->json('you dont hvae permission');
         }
         return $next($request);

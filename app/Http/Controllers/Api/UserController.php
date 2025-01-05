@@ -26,7 +26,7 @@ class UserController extends Controller
             // dd("sad")
             return $this->apiResponse($this->userService->getAllUsers(), '', 200);
         } catch (\Exception $e) {
-            return $this->errorApiResponse($e->getMessage(), 'Error at create user', $e->getCode());
+            return $this->errorApiResponse($e->getMessage(), 'Error at get users', $e->getCode());
         }
     }
 
