@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 // Routes that don't require authentication
-// Route::post('/register', [UserController::class, 'register'])->name('users.register');
+Route::post('/register', [UserController::class, 'register'])->name('users.register');
 Route::get('/login-data', [UserController::class, 'checkLogin'])->name('users.checkLogin');
 Route::post('/login', [UserController::class, 'login'])->name('users.login')->middleware('checkApiKey');
 
