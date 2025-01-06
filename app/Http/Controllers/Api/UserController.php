@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Carbon\Exceptions\Exception;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
@@ -33,6 +34,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
+            dd($request->header());
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users',
@@ -102,7 +104,7 @@ class UserController extends Controller
             // Use the AuthService to handle registration
             $this->userService->createUser($validatedData);
 
-            if (!$token = auth()->attempt($validatedData)) {
+            if (!$token = JWTAuth::attempt($validatedData)) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
@@ -125,7 +127,7 @@ class UserController extends Controller
                 'password' => 'required|string',
             ]);
 
-            if (!$token = auth()->attempt($validatedData)) {
+            if (!$token = JWTAuth::attempt($validatedData)) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
@@ -150,8 +152,15 @@ class UserController extends Controller
         return $this->apiResponse([], 'User successfully signed out', 200);
     }
 
-    public function checkLogin(){
+    public function checkLogin()
+    {
         return $this->apiResponse([], 'Forbidden', 403);
     }
 
+    public function checkToken()
+    {
+        $user = auth()->user();
+
+        return $this->apiResponse($user, '', 200);
+    }
 }

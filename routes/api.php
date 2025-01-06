@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [UserController::class, 'register'])->name('users.register')->middleware('checkApiKey');
 Route::get('/login-data', [UserController::class, 'checkLogin'])->name('users.checkLogin');
 Route::post('/login', [UserController::class, 'login'])->name('users.login')->middleware('checkApiKey');
+Route::get('/users/checkToken', [UserController::class, 'checkToken'])->name('users.checkToken')->middleware('auth:jwt');
 
 // Routes that require authentication
 Route::group(['middleware' => ['auth:jwt', 'checkApiKey']], function () {
