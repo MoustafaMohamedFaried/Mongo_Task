@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserService
 {
@@ -55,19 +55,13 @@ class UserService
         return $this->userRepository->delete($user_id);
     }
 
-    public function createNewToken($token){
-        return[
+    public function createNewToken($token)
+    {
+        return [
             'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user()
+            'token_type' => 'Bearer', // Standardize capitalization
+            'expires_in' => JWTAuth::factory()->getTTL() * 60, // Use JWTAuth for consistency
+            'user' => auth()->user(), // Include the authenticated user details
         ];
-        // return response()->json([
-        //     'access_token' => $token,
-        //     'token_type' => 'bearer',
-        //     'expires_in' => auth()->factory()->getTTL() * 60,
-        //     'user' => auth()->user()
-        // ]);
     }
-
 }

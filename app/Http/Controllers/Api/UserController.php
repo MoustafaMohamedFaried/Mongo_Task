@@ -9,6 +9,7 @@ use Carbon\Exceptions\Exception;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\JWT;
 
 class UserController extends Controller
 {
@@ -24,7 +25,6 @@ class UserController extends Controller
     public function index()
     {
         try {
-            // dd("sad")
             return $this->apiResponse($this->userService->getAllUsers(), '', 200);
         } catch (\Exception $e) {
             return $this->errorApiResponse($e->getMessage(), 'Error at get users', $e->getCode());
@@ -34,7 +34,10 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            dd($request->header());
+            // get the decoded token claims
+            // $decodedToken = JWTAuth::parseToken()->getPayload();
+            // dd($decodedToken);
+
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users',
@@ -142,14 +145,31 @@ class UserController extends Controller
     }
     public function profile()
     {
-        return $this->apiResponse(auth()->user(), '', 200);
+        try {
+            // Authenticate user using JWT token
+            $user = JWTAuth::parseToken()->authenticate();
+
+            // Return the authenticated user's profile
+            return $this->apiResponse($user, 'User profile retrieved successfully', 200);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return $this->errorApiResponse([], 'Token has expired', 401);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return $this->errorApiResponse([], 'Token is invalid', 401);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return $this->errorApiResponse([], 'Token is not provided', 401);
+        }
     }
 
     public function logout()
     {
-        auth()->logout();
+        try {
+            // Invalidate the token
+            JWTAuth::invalidate(JWTAuth::getToken());
 
-        return $this->apiResponse([], 'User successfully signed out', 200);
+            return $this->apiResponse([], 'User successfully signed out', 200);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return $this->errorApiResponse([], 'Failed to log out, token is invalid', 401);
+        }
     }
 
     public function checkLogin()

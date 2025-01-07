@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use MongoDB\Laravel\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -45,6 +46,14 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims()
     {
-        return [];
+        $user = JWTAuth::parseToken()->authenticate();
+
+        return [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+        ];
     }
 }
