@@ -46,7 +46,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims()
     {
-        $user = JWTAuth::parseToken()->authenticate();
+        $user = auth()->user();
 
         return [
             'user' => [
