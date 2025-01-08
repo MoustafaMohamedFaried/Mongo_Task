@@ -107,15 +107,16 @@ class UserController extends Controller
             ]);
 
             // Use the AuthService to handle registration
-            $this->userService->createUser($validatedData);
+            $createdUser = $this->userService->createUser($validatedData);
 
-            if (!$token = JWTAuth::attempt($validatedData)) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
+            // if (!$token = JWTAuth::attempt($validatedData)) {
+            //     return response()->json(['error' => 'Unauthorized'], 401);
+            // }
 
-            $createdToken = $this->userService->createNewToken($token);
+            // $createdToken = $this->userService->createNewToken($token);
 
-            return $this->apiResponse($createdToken, 'User registered successfully', 201); // 201 for resource created
+            // return $this->apiResponse($createdToken, 'User registered successfully', 201); // 201 for resource created
+            return $this->apiResponse($createdUser, 'User registered successfully', 201); // 201 for resource created
         } catch (ValidationException $e) {
             return $this->errorApiResponse($e->errors(), 'Validation failed', 422); // 422 Unprocessable Entity
         } catch (\Exception $e) {
