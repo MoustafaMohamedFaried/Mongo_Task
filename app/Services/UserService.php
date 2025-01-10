@@ -3,12 +3,20 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Http\Request;
+use App\Traits\ApiResponseTrait;
+use Carbon\Exceptions\Exception;
+use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\JWT;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserService
 {
+    use ApiResponseTrait;
     protected $userRepository;
 
     public function __construct(UserRepository $userRepository)
@@ -16,52 +24,75 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    public function getAllUsers()
+    public function register(Request $request)
     {
-        return $this->userRepository->getAll();
-    }
+        try {
+            $request['password'] = Hash::make($request['password']);
 
-    public function getUser($user_id)
-    {
-        return $this->userRepository->find($user_id);
-    }
+            // Validate input
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|unique:users,email',
+                'password' => 'required|string|min:6',
+            ]);
 
-    public function createUser(array $data)
-    {
-        // Hash the password
-        $data['password'] = Hash::make($data['password']);
+            $createdUser = $this->userRepository->create($validatedData);
 
-        // Create the user using the repository
-        $createdUser = $this->userRepository->create($data);
-
-        return $createdUser;
-    }
-
-    public function updateUser($user_id, array $data)
-    {
-        // Hash the password if provided
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']); // Remove it if not provided
+            return $this->apiResponse($createdUser, 'User registered successfully', 201); // 201 for resource created
+        } catch (ValidationException $e) {
+            return $this->errorApiResponse($e->errors(), 'Validation failed', 422); // 422 Unprocessable Entity
+        } catch (\Exception $e) {
+            return $this->errorApiResponse($e->getMessage(), 'Error at register user', 500); // 500 Internal Server Error
         }
-
-        // Update the user using the repository
-        return $this->userRepository->update($user_id, $data);
     }
 
-    public function deleteUser($user_id)
+    public function login(Request $request)
     {
-        return $this->userRepository->delete($user_id);
+        try {
+            // Validate input
+            $validatedData = $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+            ]);
+
+            if (!$token = JWTAuth::attempt($validatedData)) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            return $this->apiResponse($token, 'Login successful', 200);
+        } catch (ValidationException $e) {
+            return $this->errorApiResponse($e->errors(), 'Validation failed', 422);
+        } catch (\Exception $e) {
+            return $this->errorApiResponse($e->getMessage(), 'Error at login user', 500);
+        }
     }
 
-    public function createNewToken($token)
+    public function profile()
     {
-        return [
-            'access_token' => $token,
-            'token_type' => 'Bearer', // Standardize capitalization
-            'expires_in' => JWTAuth::factory()->getTTL() * 60, // Use JWTAuth for consistency
-            'user' => auth()->user(), // Include the authenticated user details
-        ];
+        try {
+            // Authenticate user using JWT token
+            $user = JWTAuth::parseToken()->authenticate();
+
+            // Return the authenticated user's profile
+            return $this->apiResponse($user, 'User profile retrieved successfully', 200);
+        } catch (TokenExpiredException $e) {
+            return $this->errorApiResponse([], 'Token has expired', 401);
+        } catch (TokenInvalidException $e) {
+            return $this->errorApiResponse([], 'Token is invalid', 401);
+        } catch (JWTException $e) {
+            return $this->errorApiResponse([], 'Token is not provided', 401);
+        }
+    }
+
+    public function logout()
+    {
+        try {
+            // Invalidate the token
+            JWTAuth::invalidate(JWTAuth::getToken());
+
+            return $this->apiResponse([], 'User successfully signed out', 200);
+        } catch (JWTException $e) {
+            return $this->errorApiResponse([], 'Failed to log out, token is invalid', 401);
+        }
     }
 }

@@ -31,7 +31,7 @@ Route::post('/login', [UserController::class, 'login'])->name('users.login')->mi
 // Routes that require authentication
 Route::group(['middleware' => ['auth:jwt', 'checkApiKey']], function () {
     Route::apiResource('users', UserController::class);
-    Route::get('/user_profile', [UserController::class, 'profile'])->name('users.profile');
+    Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::get('/logout', [UserController::class, 'logout'])->name('users.logout');
 });
 
