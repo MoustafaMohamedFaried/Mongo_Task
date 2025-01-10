@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,16 +22,13 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-// Routes that don't require authentication
-Route::post('/register', [UserController::class, 'register'])->name('users.register')->middleware('checkApiKey');
-Route::get('/login-data', [UserController::class, 'checkLogin'])->name('users.checkLogin');
-Route::post('/login', [UserController::class, 'login'])->name('users.login')->middleware('checkApiKey');
-// Route::get('/users/checkToken', [UserController::class, 'checkToken'])->name('users.checkToken')->middleware(['auth:jwt','checkApiKey']);
 
-// Routes that require authentication
-Route::group(['middleware' => ['auth:jwt', 'checkApiKey']], function () {
-    Route::apiResource('users', UserController::class);
-    Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
-    Route::get('/logout', [UserController::class, 'logout'])->name('users.logout');
+Route::group(['middleware' => ['checkApiKey']], function () {
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+    Route::group(['middleware' => ['auth:jwt']], function () {
+        Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
 });
-

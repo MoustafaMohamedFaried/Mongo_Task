@@ -12,12 +12,6 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        // return $request->expectsJson() ? null : route('users.checkLogin');
-
-        if (!$request->expectsJson()) {
-            return route('users.checkLogin'); // This causes the "Route [login] not defined" error.
-        }
-
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return $request->expectsJson() ? null : route('login');
     }
 }

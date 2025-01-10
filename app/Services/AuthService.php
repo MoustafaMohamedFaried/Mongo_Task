@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\UserRepository;
+use App\Repositories\AuthRepository;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
@@ -14,14 +14,14 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
-class UserService
+class AuthService
 {
     use ApiResponseTrait;
-    protected $userRepository;
+    protected $authRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(AuthRepository $authRepository)
     {
-        $this->userRepository = $userRepository;
+        $this->authRepository = $authRepository;
     }
 
     public function register(Request $request)
@@ -36,7 +36,7 @@ class UserService
                 'password' => 'required|string|min:6',
             ]);
 
-            $createdUser = $this->userRepository->create($validatedData);
+            $createdUser = $this->authRepository->create($validatedData);
 
             return $this->apiResponse($createdUser, 'User registered successfully', 201); // 201 for resource created
         } catch (ValidationException $e) {
