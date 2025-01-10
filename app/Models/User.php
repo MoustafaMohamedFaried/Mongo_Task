@@ -18,6 +18,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'roles_and_permissions'
     ];
 
     protected $hidden = [
@@ -53,6 +54,7 @@ class User extends Authenticatable implements JWTSubject
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'roles_and_permissions' => $user->roles_and_permissions,
             ],
         ];
     }
